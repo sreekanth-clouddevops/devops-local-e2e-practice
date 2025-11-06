@@ -1,2 +1,3 @@
 Git is a distributed version control system.
 It tracks code changes and collaboration history.
+Git has three main states: modified, staged, and committed.
