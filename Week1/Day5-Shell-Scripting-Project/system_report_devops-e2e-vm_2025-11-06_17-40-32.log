@@ -1,0 +1,40 @@
+===================================
+      SYSTEM HEALTH REPORT
+Generated on: Thu Nov  6 17:40:32 UTC 2025
+===================================
+
+Hostname       : devops-e2e-vm
+Uptime         : up 9 hours, 23 minutes
+
+----- Disk Usage -----
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           392M  988K  391M   1% /run
+/dev/sda1        39G  1.8G   37G   5% /
+tmpfs           2.0G     0  2.0G   0% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+vagrant         148G   49G   99G  34% /vagrant
+tmpfs           392M  4.0K  392M   1% /run/user/1000
+
+----- Memory Usage -----
+               total        used        free      shared  buff/cache   available
+Mem:            3911         190        3015           0         705        3491
+Swap:              0           0           0
+
+----- Top 5 Processes by CPU -----
+    PID COMMAND         %CPU %MEM
+  78174 bash             0.3  0.0
+   2742 sshd             0.1  0.2
+   6720 kworker/1:2-eve  0.1  0.0
+  77975 kworker/0:0-eve  0.1  0.0
+      1 systemd          0.0  0.3
+
+----- Network Interfaces -----
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp0s3           UP             10.0.2.15/24 metric 100 fd17:625c:f037:2:a0:84ff:fe76:2e37/64 fe80::a0:84ff:fe76:2e37/64 
+enp0s8           UP             192.168.56.60/24 fe80::a00:27ff:fec4:3309/64 
+
+Load Average   :  0.17, 0.06, 0.01
+
+----- Service Status Check: ssh -----
+     Active: active (running) since Thu 2025-11-06 08:17:45 UTC; 9h ago
+
