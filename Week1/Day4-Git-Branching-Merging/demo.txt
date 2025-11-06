@@ -1,1 +1,3 @@
+<<<<<<< HEAD
 This line is from feature/Week1 branch
+=======
