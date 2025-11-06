@@ -1,0 +1,9 @@
+### System Information Report
+Generated on: Thu Nov  6 10:47:14 UTC 2025
+---------------------------------
+Hostname: devops-e2e-vm
+OS: Ubuntu 22.04.5 LTS
+Kernel: 5.15.0-160-generic
+Architecture: x86_64
+Logged in User: vagrant
+Current Directory: /home/vagrant/devops-local-e2e-practice/Week1/Day1-Linux-Essentials/tasks
