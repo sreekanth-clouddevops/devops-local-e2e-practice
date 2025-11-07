@@ -1,0 +1,97 @@
+pipeline {
+  agent any
+
+  options {
+    ansiColor('xterm')
+    timestamps()
+    buildDiscarder(logRotator(numToKeepStr: '15'))
+  }
+
+  parameters {
+    string(name: 'AWS_REGION', defaultValue: 'us-east-1', description: 'AWS region')
+    string(name: 'ECR_REPO',   defaultValue: 'devops-local-app', description: 'ECR repository name')
+    string(name: 'IMAGE_TAG',  defaultValue: '', description: 'Optional; defaults to GIT short SHA')
+  }
+
+  environment {
+    // Account ID will be read at runtime via AWS CLI
+    APP_DIR = 'Week2/Day4-Jenkins-Docker-ECR/app'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+        sh 'echo "Commit: $(git rev-parse --short HEAD)"'
+      }
+    }
+
+    stage('Resolve Account ID') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            set -euo pipefail
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            export AWS_DEFAULT_REGION=${AWS_REGION}
+            ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+            echo "ACCOUNT_ID=${ACCOUNT_ID}" > acct.env
+          '''
+        }
+      }
+    }
+
+    stage('Login to ECR') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            set -euo pipefail
+            source acct.env
+            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            export AWS_DEFAULT_REGION=${AWS_REGION}
+            aws ecr get-login-password --region ${AWS_REGION} \
+              | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+          '''
+        }
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh '''
+          set -euo pipefail
+          source acct.env
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TAG=${IMAGE_TAG:-$SHORT_SHA}
+          IMAGE_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${TAG}"
+          echo "Building image: $IMAGE_URI"
+          docker build -t "$IMAGE_URI" ${APP_DIR}
+          echo "$IMAGE_URI" > image.uri
+        '''
+      }
+    }
+
+    stage('Push to ECR') {
+      steps {
+        sh '''
+          set -euo pipefail
+          IMAGE_URI=$(cat image.uri)
+          docker push "$IMAGE_URI"
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'acct.env,image.uri', fingerprint: true
+    }
+    success {
+      script {
+        def uri = readFile('image.uri').trim()
+        echo "Pushed image: ${uri}"
+      }
+    }
+  }
+}
