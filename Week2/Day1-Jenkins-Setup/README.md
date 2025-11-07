@@ -123,7 +123,11 @@ docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 | AnsiColor            | Colorized console output         |
 | Email Extension      | Send build status emails         |
 
+
+![alt text](image.png)
+
 ---
+
 
 ## 🧩 Jenkins CLI Check
 
