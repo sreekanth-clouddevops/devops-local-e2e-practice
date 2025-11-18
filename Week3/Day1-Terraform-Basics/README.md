@@ -53,6 +53,7 @@ sudo apt-get update -y
 sudo apt-get install -y terraform
 
 terraform version
+aws sts get-caller-identity #TO get the logged in AWS account
 ####Used Commands##
 terraform plan -out=tfplan
 terraform apply
