@@ -53,4 +53,12 @@ sudo apt-get update -y
 sudo apt-get install -y terraform
 
 terraform version
+####Used Commands##
+terraform plan -out=tfplan
+terraform apply
+aws ec2 describe-instances \
+  --instance-ids <INSTANCE_ID_FROM_OUTPUT> \
+  --query "Reservations[0].Instances[0].[InstanceId,State.Name,PublicIpAddress,InstanceType]" \
+  --output table
+terraform destroy
 
