@@ -1,0 +1,11 @@
+# Terraform local directories
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+tfplan
+
+# IDE/editor files
+*.log
+*.tmp
+.DS_Store
