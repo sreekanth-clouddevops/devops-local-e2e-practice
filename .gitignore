@@ -4,7 +4,8 @@
 terraform.tfstate
 terraform.tfstate.backup
 tfplan
-
+tfplan-dev
+tfplan-qa
 # IDE/editor files
 *.log
 *.tmp
