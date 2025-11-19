@@ -1,0 +1,23 @@
+---
+- name: Week4 Day3 - EC2 setup test
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install tree
+      apt:
+        name: tree
+        state: present
+        update_cache: yes
+
+    - name: Create directory
+      file:
+        path: /opt/ansible-demo
+        state: directory
+        mode: '0755'
+
+    - name: Create test file
+      copy:
+        content: "Managed by Ansible on {{ inventory_hostname }}"
+        dest: /opt/ansible-demo/info.txt
+        mode: '0644'
