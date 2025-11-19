@@ -132,6 +132,7 @@ Replace the placeholder bucket with your real Terraform state bucket created in 
 AWS_REGION=us-east-1
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 TF_BUCKET_NAME="devops-local-tfstate-${ACCOUNT_ID}"
+grep bucket backend-and-main.tf
 
 sed -i "s/REPLACE_TFSTATE_BUCKET/${TF_BUCKET_NAME}/g" backend-and-main.tf
 
