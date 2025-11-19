@@ -1,0 +1,31 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+  become: true
+
+- name: Ensure web root directory exists
+  file:
+    path: "{{ web_root }}"
+    state: directory
+  become: true
+
+- name: Deploy index.html
+  template:
+    src: index.html.j2
+    dest: "{{ web_root }}/index.html"
+  notify: restart nginx
+  become: true
+
+- name: Ensure nginx is running
+  service:
+    name: nginx
+    state: started
+    enabled: true
+  become: true

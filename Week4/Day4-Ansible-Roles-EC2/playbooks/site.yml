@@ -1,0 +1,12 @@
+---
+- name: Configure Webserver EC2
+  hosts: web
+  become: true
+  roles:
+    - webserver
+
+- name: Configure Appserver EC2
+  hosts: app
+  become: true
+  roles:
+    - appserver

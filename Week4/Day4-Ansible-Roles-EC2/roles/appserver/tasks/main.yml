@@ -1,0 +1,55 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install Python & pip
+  apt:
+    name:
+      - python3
+      - python3-pip
+    state: present
+  become: true
+
+- name: Create app directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+  become: true
+
+- name: Copy Flask app
+  template:
+    src: app.py.j2
+    dest: "{{ app_dir }}/app.py"
+  notify: restart app
+  become: true
+
+- name: Install Flask
+  pip:
+    name: flask
+    executable: pip3
+  become: true
+
+- name: Create systemd service
+  copy:
+    dest: /etc/systemd/system/{{ service_name }}.service
+    content: |
+      [Unit]
+      Description=Simple Flask App
+
+      [Service]
+      ExecStart=/usr/bin/python3 {{ app_dir }}/app.py
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart app
+  become: true
+
+- name: Enable & start service
+  systemd:
+    name: "{{ service_name }}"
+    enabled: true
+    state: started
+  become: true
