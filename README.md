@@ -1,0 +1,1 @@
+This is about Week1 with Linux, Scriptin, and Git Sessions
