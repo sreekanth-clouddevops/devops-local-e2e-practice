@@ -1,0 +1,39 @@
+---
+- name: Week4 Day1 - Ansible Basics on local VM
+  hosts: local
+  become: true
+  vars:
+    env_name: "local-dev"
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install basic packages
+      ansible.builtin.apt:
+        name:
+          - htop
+          - tree
+        state: present
+
+    - name: Create DevOps practice directory
+      ansible.builtin.file:
+        path: /opt/devops-labs
+        state: directory
+        owner: "{{ ansible_user | default('vagrant') }}"
+        group: "{{ ansible_user | default('vagrant') }}"
+        mode: '0755'
+
+    - name: Deploy custom MOTD banner
+      ansible.builtin.template:
+        src: ../files/motd.j2
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Show completion message
+      ansible.builtin.debug:
+        msg: "Week4 Day1 basic Ansible setup completed on {{ inventory_hostname }}"
