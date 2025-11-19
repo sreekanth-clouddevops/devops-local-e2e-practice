@@ -1,0 +1,112 @@
+pipeline {
+  agent any
+
+  parameters {
+    choice(name: 'ACTION', choices: ['PLAN', 'APPLY', 'DESTROY'], description: 'Terraform action')
+    string(name: 'AWS_REGION', defaultValue: 'us-east-1')
+    string(name: 'ENVIRONMENT', defaultValue: 'dev')
+  }
+
+  environment {
+    TF_WORKDIR = "Week3/Day5-Terraform-CICD/envs/dev"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Terraform Init') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'aws-terraform-creds',
+          usernameVariable: 'AWS_ACCESS_KEY_ID',
+          passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+        )]) {
+          sh """
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${AWS_REGION}
+
+            cd ${TF_WORKDIR}
+            terraform init -input=false
+          """
+        }
+      }
+    }
+
+    stage('Validate') {
+      steps {
+        sh """
+          cd ${TF_WORKDIR}
+          terraform fmt -check
+          terraform validate
+        """
+      }
+    }
+
+    stage('Plan') {
+      when { anyOf { expression { params.ACTION == "PLAN" }; expression { params.ACTION == "APPLY" } } }
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'aws-terraform-creds',
+          usernameVariable: 'AWS_ACCESS_KEY_ID',
+          passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+        )]) {
+          sh """
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${AWS_REGION}
+
+            cd ${TF_WORKDIR}
+            terraform plan -out=tfplan
+            terraform show tfplan
+          """
+        }
+      }
+    }
+
+    stage('Apply') {
+      when { expression { params.ACTION == "APPLY" } }
+      steps {
+        input message: "Apply Terraform changes?", ok: "Yes apply"
+        withCredentials([usernamePassword(
+          credentialsId: 'aws-terraform-creds',
+          usernameVariable: 'AWS_ACCESS_KEY_ID',
+          passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+        )]) {
+          sh """
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${AWS_REGION}
+
+            cd ${TF_WORKDIR}
+            terraform apply -input=false tfplan
+          """
+        }
+      }
+    }
+
+    stage('Destroy') {
+      when { expression { params.ACTION == "DESTROY" } }
+      steps {
+        input message: "Destroy AWS infra?", ok: "Yes destroy"
+        withCredentials([usernamePassword(
+          credentialsId: 'aws-terraform-creds',
+          usernameVariable: 'AWS_ACCESS_KEY_ID',
+          passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+        )]) {
+          sh """
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${AWS_REGION}
+
+            cd ${TF_WORKDIR}
+            terraform destroy -auto-approve
+          """
+        }
+      }
+    }
+  }
+}
