@@ -200,21 +200,9 @@ pipeline {
   agent any
 
   parameters {
-    choice(
-      name: 'ACTION',
-      choices: ['PLAN', 'APPLY', 'DESTROY'],
-      description: 'Terraform action to perform'
-    )
-    string(
-      name: 'AWS_REGION',
-      defaultValue: 'us-east-1',
-      description: 'AWS region'
-    )
-    string(
-      name: 'ENVIRONMENT',
-      defaultValue: 'dev',
-      description: 'Environment name (dev)'
-    )
+    choice(name: 'ACTION', choices: ['PLAN', 'APPLY', 'DESTROY'], description: 'Terraform action')
+    string(name: 'AWS_REGION', defaultValue: 'us-east-1')
+    string(name: 'ENVIRONMENT', defaultValue: 'dev')
   }
 
   environment {
@@ -224,18 +212,7 @@ pipeline {
   stages {
 
     stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
-
-    stage('Show Versions') {
-      steps {
-        sh """
-          terraform version || echo 'Terraform not found'
-          aws --version || echo 'AWS CLI not found'
-        """
-      }
+      steps { checkout scm }
     }
 
     stage('Terraform Init') {
@@ -246,9 +223,9 @@ pipeline {
           passwordVariable: 'AWS_SECRET_ACCESS_KEY'
         )]) {
           sh """
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-            export AWS_DEFAULT_REGION=${AWS_REGION}
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${params.AWS_REGION}
 
             cd ${TF_WORKDIR}
             terraform init -input=false
@@ -268,12 +245,7 @@ pipeline {
     }
 
     stage('Terraform Plan') {
-      when {
-        anyOf {
-          expression { params.ACTION == 'PLAN' }
-          expression { params.ACTION == 'APPLY' }
-        }
-      }
+      when { anyOf { expression { params.ACTION == "PLAN" }; expression { params.ACTION == "APPLY" } } }
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'aws-terraform-creds',
@@ -281,33 +253,33 @@ pipeline {
           passwordVariable: 'AWS_SECRET_ACCESS_KEY'
         )]) {
           sh """
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-            export AWS_DEFAULT_REGION=${AWS_REGION}
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${params.AWS_REGION}
 
             cd ${TF_WORKDIR}
-            terraform plan -out=tfplan -input=false -var="aws_region=${AWS_REGION}" -var="environment=${ENVIRONMENT}"
+            terraform plan -out=tfplan -input=false \
+              -var="environment=${params.ENVIRONMENT}" \
+              -var="aws_region=${params.AWS_REGION}"
             terraform show tfplan
           """
         }
       }
     }
 
-    stage('Terraform Apply') {
-      when {
-        expression { params.ACTION == 'APPLY' }
-      }
+    stage('Apply') {
+      when { expression { params.ACTION == "APPLY" } }
       steps {
-        input message: "Apply Terraform changes for ENV=${ENVIRONMENT}, REGION=${AWS_REGION}?", ok: "Yes, apply"
+        input message: "Apply Terraform changes?", ok: "Yes apply"
         withCredentials([usernamePassword(
           credentialsId: 'aws-terraform-creds',
           usernameVariable: 'AWS_ACCESS_KEY_ID',
           passwordVariable: 'AWS_SECRET_ACCESS_KEY'
         )]) {
           sh """
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-            export AWS_DEFAULT_REGION=${AWS_REGION}
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${params.AWS_REGION}
 
             cd ${TF_WORKDIR}
             terraform apply -input=false tfplan
@@ -316,30 +288,29 @@ pipeline {
       }
     }
 
-    stage('Terraform Destroy') {
-      when {
-        expression { params.ACTION == 'DESTROY' }
-      }
+    stage('Destroy') {
+      when { expression { params.ACTION == "DESTROY" } }
       steps {
-        input message: "Destroy Terraform-managed resources for ENV=${ENVIRONMENT}?", ok: "Yes, destroy"
+        input message: "Destroy AWS infra?", ok: "Yes destroy"
         withCredentials([usernamePassword(
           credentialsId: 'aws-terraform-creds',
           usernameVariable: 'AWS_ACCESS_KEY_ID',
           passwordVariable: 'AWS_SECRET_ACCESS_KEY'
         )]) {
           sh """
-            export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-            export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-            export AWS_DEFAULT_REGION=${AWS_REGION}
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            export AWS_DEFAULT_REGION=${params.AWS_REGION}
 
             cd ${TF_WORKDIR}
-            terraform destroy -auto-approve -var="aws_region=${AWS_REGION}" -var="environment=${ENVIRONMENT}"
+            terraform destroy -auto-approve \
+              -var="environment=${params.ENVIRONMENT}" \
+              -var="aws_region=${params.AWS_REGION}"
           """
         }
       }
     }
   }
-
   post {
     always {
       echo "Terraform pipeline completed (success or fail)."
@@ -352,6 +323,7 @@ pipeline {
     }
   }
 }
+
 ```
 
 ---

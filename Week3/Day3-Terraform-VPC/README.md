@@ -1,4 +1,4 @@
-# Week 3 – Day 2: Terraform VPC Module (VPC + Subnets + IGW + NAT + Routes)
+# Week 3 – Day 3: Terraform VPC Module (VPC + Subnets + IGW + NAT + Routes)
 
 ## 🎯 Objectives
 - Create production-grade VPC with public & private subnets
