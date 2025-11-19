@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevOps Local Lab - Ansible Webserver</title>
+</head>
+<body>
+    <h1>Welcome to DevOps Local Lab</h1>
+    <p>This page is deployed by Ansible role: <strong>webserver</strong>.</p>
+    <p>Host: {{ inventory_hostname }}</p>
+    <p>Environment: {{ env_name | default('dev') }}</p>
+    <p>Date: {{ ansible_date_time.date }} Time: {{ ansible_date_time.time }}</p>
+</body>
+</html>

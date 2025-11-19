@@ -1,0 +1,45 @@
+---
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+
+- name: Install web server package
+  ansible.builtin.apt:
+    name: "{{ web_package }}"
+    state: present
+  become: true
+
+- name: Ensure web root directory exists
+  ansible.builtin.file:
+    path: "{{ web_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  become: true
+
+- name: Deploy index page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ web_root }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: restart webserver
+  become: true
+
+- name: Ensure nginx default site is enabled (simple case)
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: link
+    src: /etc/nginx/sites-available/default
+  become: true
+
+- name: Ensure web service is enabled and running
+  ansible.builtin.service:
+    name: "{{ web_service }}"
+    state: started
+    enabled: true
+  become: true

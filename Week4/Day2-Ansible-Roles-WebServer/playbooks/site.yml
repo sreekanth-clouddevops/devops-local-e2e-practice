@@ -1,0 +1,8 @@
+---
+- name: Week4 Day2 - Configure Nginx web server via role
+  hosts: web
+  become: true
+  vars:
+    env_name: "local-web-dev"
+  roles:
+    - webserver

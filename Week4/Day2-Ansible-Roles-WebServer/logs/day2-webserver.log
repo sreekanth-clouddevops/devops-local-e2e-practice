@@ -1,0 +1,30 @@
+
+PLAY [Week4 Day2 - Configure Nginx web server via role] ************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [webserver : Ensure apt cache is updated] *********************************
+changed: [localhost]
+
+TASK [webserver : Install web server package] **********************************
+changed: [localhost]
+
+TASK [webserver : Ensure web root directory exists] ****************************
+changed: [localhost]
+
+TASK [webserver : Deploy index page] *******************************************
+changed: [localhost]
+
+TASK [webserver : Ensure nginx default site is enabled (simple case)] **********
+ok: [localhost]
+
+TASK [webserver : Ensure web service is enabled and running] *******************
+ok: [localhost]
+
+RUNNING HANDLER [webserver : restart webserver] ********************************
+changed: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=8    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
