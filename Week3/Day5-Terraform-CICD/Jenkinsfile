@@ -36,7 +36,7 @@ pipeline {
       }
     }
 
-    stage('Validate') {
+    stage('Terraform Validate') {
       steps {
         sh """
           cd ${TF_WORKDIR}
@@ -46,7 +46,7 @@ pipeline {
       }
     }
 
-    stage('Plan') {
+    stage('Terraform Plan') {
       when { anyOf { expression { params.ACTION == "PLAN" }; expression { params.ACTION == "APPLY" } } }
       steps {
         withCredentials([usernamePassword(
@@ -60,7 +60,9 @@ pipeline {
             export AWS_DEFAULT_REGION=${params.AWS_REGION}
 
             cd ${TF_WORKDIR}
-            terraform plan -out=tfplan
+            terraform plan -out=tfplan -input=false \
+              -var="environment=${params.ENVIRONMENT}" \
+              -var="aws_region=${params.AWS_REGION}"
             terraform show tfplan
           """
         }
@@ -103,10 +105,23 @@ pipeline {
             export AWS_DEFAULT_REGION=${params.AWS_REGION}
 
             cd ${TF_WORKDIR}
-            terraform destroy -auto-approve
+            terraform destroy -auto-approve \
+              -var="environment=${params.ENVIRONMENT}" \
+              -var="aws_region=${params.AWS_REGION}"
           """
         }
       }
+    }
+  }
+  post {
+    always {
+      echo "Terraform pipeline completed (success or fail)."
+    }
+    success {
+      echo "Terraform pipeline finished successfully."
+    }
+    failure {
+      echo "Terraform pipeline failed."
     }
   }
 }
