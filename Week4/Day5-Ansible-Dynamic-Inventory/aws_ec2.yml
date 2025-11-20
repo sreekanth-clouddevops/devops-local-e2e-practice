@@ -1,0 +1,25 @@
+plugin: amazon.aws.aws_ec2
+
+# Regions to scan
+regions:
+  - us-east-1
+
+# Only running instances
+filters:
+  instance-state-name: running
+
+# What to use as hostname
+hostnames:
+  - public-ip-address
+
+# Build groups based on EC2 Name tag and state
+keyed_groups:
+  - key: tags['Name']
+    prefix: tag_Name_
+  - key: instance_state
+    prefix: state_
+
+# Compose Ansible connection variables
+compose:
+  ansible_user: "'ubuntu'"
+  ansible_ssh_private_key_file: "'../Day3-Ansible-EC2/keys/devops-keypair'"
