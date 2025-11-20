@@ -121,7 +121,8 @@ volumes:
 ## 🚀 Step 5 — Start App
 
 ```bash
-docker compose up -d
+sudo apt install docker-compose
+docker-compose up -d
 ```
 
 ---
@@ -143,7 +144,7 @@ Hello from Docker Compose! Site visited X times.
 ## 🚀 Step 7 — View Logs
 
 ```bash
-docker compose logs -f
+docker-compose logs -f
 ```
 
 ---
@@ -151,7 +152,7 @@ docker compose logs -f
 ## 🚀 Step 8 — Stop and Cleanup
 
 ```bash
-docker compose down
+docker-compose down
 ```
 
 Delete volume if needed:
