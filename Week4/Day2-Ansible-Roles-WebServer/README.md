@@ -311,3 +311,16 @@ You now have:
 
 If you’re ready, say **“Start Week4-Day3”** and we’ll continue with **Ansible provisioning on real AWS EC2 instances**, including SSH key automation and inventory generation.
 
+####Known Error#
+The key part of the error:
+
+the role 'webserver' was not found in /home/vagrant/devops-local-e2e-practice/Week4/Day2-Ansible-Roles-WebServer/playbooks/roles:...
+
+Sol:
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$ mkdir -p playbooks/roles
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$ mv roles/webserver playbooks/roles/
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$ mv roles/appserver playbooks/roles/
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$ rmdir roles 2>/dev/null || true
+vagrant@devops-e2e-vm:~/devops-local-e2e-practice/Week4/Day4-Ansible-Roles-EC2$
