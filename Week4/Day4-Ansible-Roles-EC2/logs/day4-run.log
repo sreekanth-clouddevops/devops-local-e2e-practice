@@ -1,0 +1,57 @@
+
+PLAY [Configure Webserver EC2] *************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [3.95.235.101]
+
+TASK [webserver : Update apt cache] ********************************************
+changed: [3.95.235.101]
+
+TASK [webserver : Install nginx] ***********************************************
+changed: [3.95.235.101]
+
+TASK [webserver : Ensure web root directory exists] ****************************
+ok: [3.95.235.101]
+
+TASK [webserver : Deploy index.html] *******************************************
+changed: [3.95.235.101]
+
+TASK [webserver : Ensure nginx is running] *************************************
+ok: [3.95.235.101]
+
+RUNNING HANDLER [webserver : restart nginx] ************************************
+changed: [3.95.235.101]
+
+PLAY [Configure Appserver EC2] *************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [52.72.41.195]
+
+TASK [appserver : Update apt cache] ********************************************
+changed: [52.72.41.195]
+
+TASK [appserver : Install Python & pip] ****************************************
+changed: [52.72.41.195]
+
+TASK [appserver : Create app directory] ****************************************
+changed: [52.72.41.195]
+
+TASK [appserver : Copy Flask app] **********************************************
+changed: [52.72.41.195]
+
+TASK [appserver : Install Flask] ***********************************************
+changed: [52.72.41.195]
+
+TASK [appserver : Create systemd service] **************************************
+changed: [52.72.41.195]
+
+TASK [appserver : Enable & start service] **************************************
+changed: [52.72.41.195]
+
+RUNNING HANDLER [appserver : restart app] **************************************
+changed: [52.72.41.195]
+
+PLAY RECAP *********************************************************************
+3.95.235.101               : ok=7    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+52.72.41.195               : ok=9    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
