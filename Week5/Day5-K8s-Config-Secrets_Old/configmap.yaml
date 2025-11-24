@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: week5-config
+data:
+  APP_GREETING: "Hello from ConfigMap (Week5-Day5)!"
+  APP_ENV: "dev"

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: week5-config-flask-deploy
+  namespace: week5-config
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: week5-config-flask
+  template:
+    metadata:
+      labels:
+        app: week5-config-flask
+    spec:
+      imagePullSecrets:
+        - name: ecr-pull-secret
+      containers:
+        - name: week5-config-flask-container
+          image: 953816747017.dkr.ecr.us-east-1.amazonaws.com/week5-flask-app:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            # From ConfigMap
+            - name: APP_GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_GREETING
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_ENV
+
+            # From Secret
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: API_KEY
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: DB_PASSWORD
+
+          # Health Checks
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
