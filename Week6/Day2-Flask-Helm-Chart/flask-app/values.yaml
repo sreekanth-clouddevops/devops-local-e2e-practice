@@ -1,0 +1,82 @@
+# Number of replicas
+replicaCount: 1
+
+# Image configuration (ECR)
+image:
+  repository: 953816747017.dkr.ecr.us-east-1.amazonaws.com/week5-flask-app
+  tag: "v1"
+  pullPolicy: IfNotPresent
+
+# ECR imagePullSecret
+imagePullSecrets:
+  - name: ecr-pull-secret
+
+# Name override (optional)
+nameOverride: ""
+fullnameOverride: ""
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: "flask-helm.local"
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+httpRoute:
+  enabled: false
+  parentRefs: []
+  hostnames: []
+  rules: []
+
+# ConfigMap-style environment values
+env:
+  APP_MESSAGE: "Hello from Helm Chart!"
+  APP_ENV: "prod"
+
+# Secret-style environment values
+secretEnv:
+  API_TOKEN: "super-secret-token"
+
+# SERVICE ACCOUNT (this was missing and caused the error)
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod annotations (keep empty for now)
+podAnnotations: {}
+
+# Security contexts (default from Helm starter chart)
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # runAsUser: 1000
+  # runAsGroup: 3000
+  # fsGroup: 2000
+
+# Resource requests/limits
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Node scheduling extras (keep empty)
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
