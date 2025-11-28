@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        // Name of Kubernetes namespace to deploy to
+        K8S_NAMESPACE = "week6"
+
+        // Relative chart path inside repo
+        HELM_CHART_PATH = "Week6/Day2-Flask-Helm-Chart/flask-app"
+
+        // Release name
+        HELM_RELEASE_NAME = "flaskapp"
+    }
+
+    options {
+        timestamps()
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Helm Version') {
+            steps {
+                sh 'helm version'
+                sh 'kubectl config current-context || echo "No kube context set"'
+            }
+        }
+
+        stage('Helm Lint') {
+            steps {
+                dir(HELM_CHART_PATH) {
+                    sh 'helm lint .'
+                }
+            }
+        }
+
+        stage('Helm Package') {
+            steps {
+                script {
+                    sh '''
+                      mkdir -p Week6/Day4-Helm-Jenkins-CICD/build
+                      helm package ${HELM_CHART_PATH} -d Week6/Day4-Helm-Jenkins-CICD/build
+                      ls -l Week6/Day4-Helm-Jenkins-CICD/build
+                    '''
+                }
+            }
+        }
+
+        stage('Helm Deploy (Upgrade/Install)') {
+            steps {
+                script {
+                    sh '''
+                      # Ensure namespace exists
+                      kubectl get ns ${K8S_NAMESPACE} || kubectl create namespace ${K8S_NAMESPACE}
+
+                      # Deploy from chart source
+                      helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
+                        -n ${K8S_NAMESPACE} \
+                        --wait
+
+                      echo "Current releases:"
+                      helm list -n ${K8S_NAMESPACE}
+                      echo "Deployed resources:"
+                      kubectl get pods,svc,ingress -n ${K8S_NAMESPACE}
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            archiveArtifacts artifacts: 'Week6/Day4-Helm-Jenkins-CICD/build/*.tgz', fingerprint: true
+            echo "Helm CI/CD pipeline completed successfully."
+        }
+        failure {
+            echo "Helm CI/CD pipeline FAILED."
+        }
+    }
+}
+
