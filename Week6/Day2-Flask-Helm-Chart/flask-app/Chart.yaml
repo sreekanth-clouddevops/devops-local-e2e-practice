@@ -1,3 +1,4 @@
+apiVersion: v2
 name: flask-app
 description: A Helm chart for Flask app hosted in AWS ECR
 version: 0.1.0
