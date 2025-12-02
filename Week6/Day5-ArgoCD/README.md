@@ -312,9 +312,14 @@ Service switched to NodePort:
 flaskapp-flask-app → reachable at http://192.168.56.60:<nodeport>
 
 GitOps demonstrated: change in values.yaml → commit & push → ArgoCD syncs → cluster updated.
-####kubectl svc port forward#####
+####kubectl svc port forward for argocd UI#####
 vagrant@devops-e2e-vm:~$  kubectl port-forward --address 0.0.0.0 svc/argocd-server -n argocd 8082:443
 Forwarding from 0.0.0.0:8082 -> 8080
 Handling connection for 8082
 Handling connection for 8082
 ############
+#####kubectl svc port forward for flask-app##
+vagrant@devops-e2e-vm:~$ kubectl port-forward --address 0.0.0.0 svc/flaskapp-flask-app -n week6 8083:80
+Forwarding from 0.0.0.0:8083 -> 5000
+Handling connection for 8083
+###########################
