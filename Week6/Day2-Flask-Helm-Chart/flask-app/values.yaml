@@ -17,7 +17,7 @@ fullnameOverride: ""
 
 # Service configuration
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
 
 ingress:
