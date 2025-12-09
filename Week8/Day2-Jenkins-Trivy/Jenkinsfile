@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/YOUR_GIT_REPO_URL'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                docker build -t trivy-demo-app:latest .
+                '''
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                sh '''
+                echo "Running Trivy vulnerability scan..."
+                trivy image --severity HIGH,CRITICAL --exit-code 1 trivy-demo-app:latest
+                '''
+            }
+        }
+
+        stage('Push to Registry') {
+            when {
+                expression { currentBuild.result == null }
+            }
+            steps {
+                sh '''
+                echo "No HIGH or CRITICAL vulnerabilities found — pushing image"
+                docker tag trivy-demo-app:latest my-registry/trivy-demo-app:latest
+                # docker push my-registry/trivy-demo-app:latest
+                '''
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Build failed due to HIGH/CRITICAL vulnerabilities."
+        }
+        success {
+            echo "Build completed and secure image pushed to registry."
+        }
+    }
+}
