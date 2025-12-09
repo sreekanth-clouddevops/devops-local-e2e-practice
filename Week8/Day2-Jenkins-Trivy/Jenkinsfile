@@ -11,6 +11,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
+		cd Week8/Day2-Jenkins-Trivy
                 docker build -t trivy-demo-app:latest .
                 '''
             }
