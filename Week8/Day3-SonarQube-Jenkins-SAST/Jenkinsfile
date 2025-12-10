@@ -1,0 +1,39 @@
+pipeline {
+  agent any
+
+  environment {
+    SCANNER_HOME = tool 'sonar-scanner'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+        sh 'ls -R'
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        dir('Week8/Day3-SonarQube-Jenkins-SAST') {
+          withSonarQubeEnv('local-sonar') {
+            sh """
+              ${SCANNER_HOME}/bin/sonar-scanner \
+                -Dsonar.projectKey=week8-day3-python-app \
+                -Dsonar.sources=. \
+                -Dsonar.python.version=3
+            """
+          }
+        }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 3, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
+    }
+  }
+}
