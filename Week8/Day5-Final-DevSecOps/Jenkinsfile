@@ -1,0 +1,71 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE_NAME = "devsecops-demo"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        git scm
+      }
+    }
+
+    stage('SAST - SonarQube') {
+      steps {
+        withSonarQubeEnv('sonarqube') {
+          sh 'sonar-scanner'
+        }
+      }
+    }
+
+    stage('Dependency Scan') {
+      steps {
+        sh '''
+        dependency-check.sh \
+          --project devsecops-demo \
+          --scan app \
+          --format HTML \
+          --out dependency-report \
+          --failOnCVSS 7
+        '''
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t $IMAGE_NAME app/'
+      }
+    }
+
+    stage('Container Scan - Trivy') {
+      steps {
+        sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL $IMAGE_NAME'
+      }
+    }
+
+    stage('Sign Image - Cosign') {
+      steps {
+        sh 'cosign sign --yes $IMAGE_NAME'
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        sh 'kubectl apply -f k8s/'
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "🎉 DevSecOps Pipeline Completed Successfully"
+    }
+    failure {
+      echo "❌ Pipeline Failed due to Security Issues"
+    }
+  }
+}
+
