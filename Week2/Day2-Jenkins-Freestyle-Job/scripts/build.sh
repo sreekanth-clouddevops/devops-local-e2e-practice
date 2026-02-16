@@ -11,6 +11,7 @@ echo "Checking Disk and Memory Status:"
 df -h | grep -v tmpfs
 echo
 free -m
+uname -a
 echo
 echo "Build step completed successfully!"
 echo "=============================="
