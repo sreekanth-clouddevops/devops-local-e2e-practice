@@ -16,7 +16,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh '''
-        docker build -t $IMAGE Week2/Day5-K9s-Deploy-kind/app
+        docker build -t $IMAGE Week2/Day5-K8s-Deploy-kind/app
         '''
       }
     }
