@@ -24,7 +24,7 @@ pipeline {
     stage('Load Image into kind Cluster') {
       steps {
         sh '''
-        kind load docker-image $IMAGE --name devops-kind
+        kind load docker-image $IMAGE --name pss-k8s
         '''
       }
     }
