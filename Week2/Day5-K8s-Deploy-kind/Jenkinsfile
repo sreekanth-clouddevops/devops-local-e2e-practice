@@ -1,0 +1,71 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE = "devsecops-demo:latest"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Dependency Scan (OWASP)') {
+      steps {
+        sh '''
+        dependency-check.sh \
+          --project devsecops-demo \
+          --scan app \
+          --format HTML \
+          --out dependency-report \
+          --failOnCVSS 7 || true
+        '''
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh '''
+        docker build -t $IMAGE app/
+        '''
+      }
+    }
+
+    stage('Trivy Image Scan') {
+      steps {
+        sh '''
+        trivy image --severity HIGH,CRITICAL --exit-code 0 $IMAGE
+        '''
+      }
+    }
+
+    stage('Load Image into kind Cluster') {
+      steps {
+        sh '''
+        kind load docker-image $IMAGE --name devops-kind
+        '''
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        sh '''
+        kubectl apply -f k8s/
+        '''
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        sh '''
+        kubectl get pods
+        kubectl get svc
+        '''
+      }
+    }
+
+  }
+}
