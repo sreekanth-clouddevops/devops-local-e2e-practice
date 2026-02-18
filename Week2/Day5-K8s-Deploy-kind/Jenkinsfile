@@ -32,7 +32,7 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         sh '''
-        kubectl apply -f k8s/
+        kubectl apply -f Week2/Day5-K8s-Deploy-kind/k8s-files
         '''
       }
     }
