@@ -16,7 +16,7 @@ pipeline {
     stage('Build Docker Image') {
       steps {
         sh '''
-        docker build -t $IMAGE app/
+        docker build -t $IMAGE ../Day4-Jenkins-Docker-ECR/app
         '''
       }
     }
